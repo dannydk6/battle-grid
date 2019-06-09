@@ -22,6 +22,10 @@ class App extends Component {
     this.updateUser = this.updateUser.bind(this);
   }
 
+  componentWillUnmount = () => this.abortController.abort();
+
+  abortController = new window.AbortController();
+
   componentDidMount() {
     this.getUser();
   }
