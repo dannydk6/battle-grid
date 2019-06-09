@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 
 class BattleSlot extends Component {
+    componentWillUnmount = () => this.abortController.abort();
+
+    abortController = new window.AbortController();
     render() {
         return ( 
         <div style={{width:'300px', alignContent: 'center', margin: '10px'}}>
