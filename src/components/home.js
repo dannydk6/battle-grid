@@ -24,6 +24,10 @@ class Home extends Component {
     console.log('hey')
   }
 
+  componentWillUnmount = () => this.abortController.abort();
+
+  abortController = new window.AbortController();
+  
   componentDidMount(){
     socket = socketIOClient(API_URL)
     socket.emit('userIn', {userId: this.props._id})
