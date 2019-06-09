@@ -15,6 +15,7 @@ class Home extends Component {
     super(props)
     this.state = {
       createdBattle: false,
+      handlingButton: false,
       battles: []
     }
     this.handleClick = this.handleClick.bind(this);
@@ -35,10 +36,12 @@ class Home extends Component {
   }
 
   handleClick(){
+    this.setState({handlingButton: true})
     this.postBattle();
   }
 
   handleRemove(){
+    this.setState({handlingButton: true})
     const body = {username: this.props.username, _id: this.props._id}
     axios.post("/battle/delete",body).then(response => {
       //console.log(response.data);
@@ -79,13 +82,13 @@ class Home extends Component {
     return (
       <div>
         <p> Welcome to da grid, mate </p>{" "}
-        { !this.state.createdBattle &&
+        { !this.state.handlingButton && !this.state.createdBattle &&
         <button type="button" className='btn btn-secondary' onClick={this.handleClick}>
           Create Battle
         </button>
         }
 
-        { this.state.createdBattle && 
+        { !this.state.handlingButton && this.state.createdBattle && 
           <button type="button" className='btn btn-error' onClick={this.handleRemove}>
             Remove Battle
           </button>
