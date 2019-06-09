@@ -46,7 +46,7 @@ class Home extends Component {
     axios.post("/battle/delete",body).then(response => {
       //console.log(response.data);
       this.getBattles()
-      this.setState({createdBattle: false})
+      this.setState({createdBattle: false, handlingButton: false})
       socket.emit('refreshBattles', 'refresh')
     });
   }
@@ -72,6 +72,7 @@ class Home extends Component {
       //console.log(response.data);
       this.getBattles()
       socket.emit('refreshBattles', 'refresh')
+      this.setState({handlingButton: false})
     });
   }
 
