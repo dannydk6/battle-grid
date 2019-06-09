@@ -57,7 +57,7 @@ router.get('/', (req, res, next) => {
                 console.log('battleSlot err', err)
             }
 
-            console.log(battles)
+            //console.log(battles)
             res.json({ data: battles })
         })
     } else {

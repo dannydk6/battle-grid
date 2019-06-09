@@ -13,6 +13,8 @@ const PORT = 8080
 const user = require('./routes/user')
 const battle = require('./routes/battle')
 
+const userIdByClient = new Map();
+
 // MIDDLEWARE
 app.use(morgan('dev'))
 app.use(
@@ -42,9 +44,13 @@ app.use('/user', user)
 app.use('/battle', battle)
 
 io.on('connection', function(socket) {
+    socket.on('userIn', (data) => {
+        userIdByClient.set(data.userId, socket)
+        console.log(userIdByClient.size)
+    })
     console.log('a user connected');
     socket.on('refreshBattles', function(data) {
-        console.log(`I received ${data}`);
+        //console.log(`I received ${data}`);
         socket.broadcast.emit('refresh', 'refresh')
     });
 

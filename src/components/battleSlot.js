@@ -11,7 +11,9 @@ class BattleSlot extends Component {
         <div className="card-body">
             <p className="card-text">Initiator: {this.props.initiatorName}</p>
             <p className="card-text">Challenger: {this.props.challengerName || 'None'}</p>
-            <a href="" className="btn btn-primary">Challenge!</a>
+            { !this.props.isPlayer &&
+            <button className="btn btn-primary">Challenge Request</button>
+            }
         </div>
         </div>
         </div>

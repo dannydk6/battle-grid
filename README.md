@@ -1,3 +1,5 @@
+/* DEFINE PROXY IN HTTP_PROXY var ,"proxy": "http://45.76.251.154:8080"*/
+
 ## Simple MERN Passport Template
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 

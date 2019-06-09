@@ -5,6 +5,11 @@ import BattleSlot from "./battleSlot"
 
 let socket = null
 
+let API_URL = process.env.REACT_APP_API_DEV
+if (process.env.REACT_APP_ENV === 'PRODUCTION'){
+  API_URL = process.env.REACT_APP_API_PROD
+}
+
 class Home extends Component {
   constructor(props) {
     super(props)
@@ -19,11 +24,12 @@ class Home extends Component {
   }
 
   componentDidMount(){
-    socket = socketIOClient('http://45.76.251.154:8080')
+    socket = socketIOClient(API_URL)
+    socket.emit('userIn', {userId: this.props._id})
     this.getBattles()
 
     socket.on('refresh', (data) =>{
-      console.log('yay!')
+      //console.log('yay!')
       this.getBattles()
     })
   }
@@ -35,7 +41,7 @@ class Home extends Component {
   handleRemove(){
     const body = {username: this.props.username, _id: this.props._id}
     axios.post("/battle/delete",body).then(response => {
-      console.log(response.data);
+      //console.log(response.data);
       this.getBattles()
       this.setState({createdBattle: false})
       socket.emit('refreshBattles', 'refresh')
@@ -47,8 +53,10 @@ class Home extends Component {
       const battles = response.data.data
       let createdBattle = false
       battles.forEach((battle) =>{
+        battle.isPlayer = false
         if (battle.initiatorId === this.props._id){
           createdBattle = true
+          battle.isPlayer = true
         }
       })
       this.setState({battles: battles, createdBattle: createdBattle})
@@ -58,7 +66,7 @@ class Home extends Component {
   postBattle() {
     const body = {username: this.props.username, _id: this.props._id}
     axios.post("/battle/",body).then(response => {
-      console.log(response.data);
+      //console.log(response.data);
       this.getBattles()
       socket.emit('refreshBattles', 'refresh')
     });
@@ -66,7 +74,7 @@ class Home extends Component {
 
   render() {
     const battles = this.state.battles.map((battle)=>{
-      return <BattleSlot initiatorName={battle.initiatorName} initiatorId={battle.initiatorId} key={battle._id} />
+      return <BattleSlot initiatorName={battle.initiatorName} initiatorId={battle.initiatorId} isPlayer={battle.isPlayer} key={battle._id} />
     })
     return (
       <div>

@@ -61,7 +61,7 @@ class App extends Component {
         {/* greet user if logged in: */}{" "}
         {this.state.loggedIn && <p style={{paddingTop:'10px'}}> Join the party, {this.state.username}! </p>}{" "}
         {/* Routes to different components */}{" "}
-        {this. state.loggedIn && <Route 
+        {this. state.loggedIn && <Route
           exact path="/"
           render={() => <Home _id={this.state._id} username={this.state.username} />} />}
         <Route
