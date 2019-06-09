@@ -7,7 +7,7 @@ router.post('/', (req, res) => {
     console.log('user signup');
 
     const { username, password } = req.body
-    // ADD VALIDATION
+        // ADD VALIDATION
     User.findOne({ username: username }, (err, user) => {
         if (err) {
             console.log('User.js post error: ', err)
@@ -15,8 +15,7 @@ router.post('/', (req, res) => {
             res.json({
                 error: `Sorry, already a user with the username: ${username}`
             })
-        }
-        else {
+        } else {
             const newUser = new User({
                 username: username,
                 password: password
@@ -31,7 +30,7 @@ router.post('/', (req, res) => {
 
 router.post(
     '/login',
-    function (req, res, next) {
+    function(req, res, next) {
         console.log('routes/user.js, login, req.body: ');
         console.log(req.body)
         next()
@@ -40,7 +39,8 @@ router.post(
     (req, res) => {
         console.log('logged in', req.user);
         var userInfo = {
-            username: req.user.username
+            username: req.user.username,
+            _id: req.user._id
         };
         res.send(userInfo);
     }
