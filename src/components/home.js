@@ -19,7 +19,7 @@ class Home extends Component {
   }
 
   componentDidMount(){
-    socket = socketIOClient('http://localhost:8080')
+    socket = socketIOClient('http://45.76.251.154:8080')
     this.getBattles()
 
     socket.on('refresh', (data) =>{
