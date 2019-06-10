@@ -1,6 +1,19 @@
 import React, { Component } from "react";
 
 class BattleSlot extends Component {
+    constructor(){
+        super()
+        this.state = {
+            challengeSent: false
+        }
+    }
+    handleClick = () => {
+        this.setState({challengeMade: true})
+        this.props.sendBattleRequest(
+            {initiatorId: this.props.initiatorId,
+             initiatorName: this.props.initiatorName,
+             battleId: this.props.battleId})
+    }
     componentWillUnmount = () => this.abortController.abort();
 
     abortController = new window.AbortController();
@@ -14,8 +27,8 @@ class BattleSlot extends Component {
         <div className="card-body">
             <p className="card-text">Initiator: {this.props.initiatorName}</p>
             <p className="card-text">Challenger: {this.props.challengerName || 'None'}</p>
-            { !this.props.isPlayer &&
-            <button className="btn btn-primary">Challenge Request</button>
+            { !this.state.challengeSent &&
+            <button className="btn btn-primary" onClick={this.handleClick}>Challenge Request</button>
             }
         </div>
         </div>

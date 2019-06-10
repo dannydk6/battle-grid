@@ -12,6 +12,7 @@ const PORT = 8080
     // Route requires
 const user = require('./routes/user')
 const battle = require('./routes/battle')
+const BattleSlot = require('./database/models/battleSlots')
 
 const userIdByClient = new Map();
 
@@ -53,6 +54,28 @@ io.on('connection', function(socket) {
         //console.log(`I received ${data}`);
         socket.broadcast.emit('refresh', 'refresh')
     });
+
+    socket.on('battleRequest', function(data) {
+        //console.log(data)
+        console.log(`I received this battleRequest by ${data.challengerName} to ${data.initiatorName}`)
+        if (userIdByClient.get(data.initiatorId)) {
+            const initSocket = userIdByClient.get(data.initiatorId)
+            BattleSlot.update({ _id: data.battleId }, {
+                $set: {
+                    [`challengers.${data.challengerId}`]: {
+                        challengerName: data.challengerName
+                    }
+                }
+            }, (err) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    initSocket.emit('challengeRequest', data)
+                }
+            })
+
+        }
+    })
 
 });
 

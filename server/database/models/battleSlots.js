@@ -8,6 +8,7 @@ const battleSlotSchema = new Schema({
     initiatorName: { type: String, unique: false, required: true },
     openBattle: { type: Boolean, unique: false, required: false, default: null },
     challenger: { type: String, unique: false, required: false, default: null },
+    challengers: { type: Object, unique: false, required: false, default: {} },
     challengeAccepted: { type: Boolean, unique: false, required: false, default: false },
 
 })

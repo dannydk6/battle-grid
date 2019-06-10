@@ -23,7 +23,7 @@ class App extends Component {
     this.abortController = new window.AbortController();
   }
 
-  componentWillUnmount = () => this.abortController.abort();
+  componentWillUnmount = () => {this.abortController.abort();}
 
   componentDidMount() {
     this.getUser();
@@ -63,8 +63,9 @@ class App extends Component {
         <Navbar updateUser={this.updateUser} loggedIn={this.state.loggedIn} />{" "}
         {/* greet user if logged in: */}{" "}
         {this.state.loggedIn && <p style={{paddingTop:'10px'}}> Join the party, {this.state.username}! </p>}{" "}
-        {/* Routes to different components */}{" "}
-        {this. state.loggedIn && <Route
+        {/* Routes to different components */}
+        {this.state.loggedIn && 
+        <Route
           exact path="/"
           render={() => <Home _id={this.state._id} username={this.state.username} />} />}
         <Route

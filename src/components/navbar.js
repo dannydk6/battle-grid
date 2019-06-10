@@ -37,10 +37,15 @@ class Navbar extends Component {
 
     return (
       <div>
+        <div style={deckStyle} className='App-header'>
+        <div>
+            <img src={logo} className="App-logo" alt="logo" />
+            <h1 className="App-title"><div>Battle Grid PoC</div></h1>
+          </div>
+        </div>
         <header className="navbar App-header" id="nav-container">
-          <div className="col-4">
             {loggedIn ? (
-              <section className="navbar-section">
+              <section>
                 <Link to="/" className="btn btn-link text-secondary">
                   <span className="text-secondary">home</span>
                 </Link>
@@ -53,7 +58,7 @@ class Navbar extends Component {
                 </Link>
               </section>
             ) : (
-              <section className="navbar-section">
+              <section>
                 <Link to="/login" className="btn btn-link text-secondary">
                   <span className="text-secondary">login</span>
                 </Link>
@@ -62,16 +67,14 @@ class Navbar extends Component {
                 </Link>
               </section>
             )}
-          </div>
-          <div className="col-4 col-mr-auto">
-            <div id="top-filler" />
-            <img src={logo} className="App-logo" alt="logo" />
-            <h1 className="App-title">Battle Grid PoC</h1>
-          </div>
         </header>
       </div>
     );
   }
 }
+
+const deckStyle = {width:'100%', display:'flex',
+flexDirection:'row',alignItems: 'center',
+textAlign: 'center', justifyContent:'center'}
 
 export default withRouter(Navbar);

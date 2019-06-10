@@ -14,7 +14,10 @@ class LoginForm extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
+  componentWillUnmount = () => this.abortController.abort();
 
+  abortController = new window.AbortController();
+  
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value
@@ -37,7 +40,8 @@ class LoginForm extends Component {
           // update App.js state
           this.props.updateUser({
             loggedIn: true,
-            username: response.data.username
+            username: response.data.username,
+            _id: response.data._id
           });
           // update the state to redirect to home
           this.setState({
@@ -59,16 +63,13 @@ class LoginForm extends Component {
     } else {
       return (
         <div>
-          <h4 style={{marginTop:'10px'}}> Login </h4>{" "}
+          <h4 style={{marginTop:'10px'}}> Login </h4>
+          <div style={deckStyle}>
           <form className="form-horizontal">
             <div className="form-group">
-              <div className="col-1 col-ml-auto">
-                <label className="form-label" htmlFor="username">
-                  {" "}
-                  Username{" "}
-                </label>{" "}
-              </div>{" "}
-              <div className="col-3 col-mr-auto">
+                <p><label className="form-label" htmlFor="username">
+                  Username:
+                </label>
                 <input
                   className="form-input"
                   type="text"
@@ -77,17 +78,13 @@ class LoginForm extends Component {
                   placeholder="Username"
                   value={this.state.username}
                   onChange={this.handleChange}
-                />{" "}
-              </div>{" "}
-            </div>{" "}
+                /></p>
+            </div>
             <div className="form-group">
-              <div className="col-1 col-ml-auto">
+              <p>
                 <label className="form-label" htmlFor="password">
-                  {" "}
-                  Password:{" "}
-                </label>{" "}
-              </div>{" "}
-              <div className="col-3 col-mr-auto">
+                  Password:
+                </label>
                 <input
                   className="form-input"
                   placeholder="password"
@@ -95,26 +92,29 @@ class LoginForm extends Component {
                   name="password"
                   value={this.state.password}
                   onChange={this.handleChange}
-                />{" "}
-              </div>{" "}
-            </div>{" "}
-            <div className="form-group ">
-              <div className="col-7"> </div>{" "}
-              <button
-                className="btn btn-primary col-1 col-mr-auto"
+                />
+              </p>
+            </div>
+              <p><button
+                className="btn btn-primary"
                 onClick={this.handleSubmit}
                 type="submit"
               >
-                {" "}
-                Login{" "}
-              </button>{" "}
-            </div>{" "}
-          </form>{" "}
-          {this.state.errLogin && <p style={{color:'red',marginTop:'10px'}}>Your username and password mismatch.</p>}
+              Login
+              </button>
+              </p>
+          </form>
+          
+        </div>
+        {this.state.errLogin && <p style={{color:'red'}}>Your username and password mismatch.</p>}
         </div>
       );
     }
   }
 }
+
+const deckStyle = {width:'100%', minWidth: '300px', display:'flex', marginTop: '10px',
+flexDirection:'row',alignItems: 'center',
+textAlign: 'center', justifyContent:'center'}
 
 export default LoginForm;
