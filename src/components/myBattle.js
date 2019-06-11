@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 
 class MyBattle extends Component {
+    handleClick = (challengerId) => {
+        const challengerName = this.props.challengers[challengerId]
+        const battleId = this.props.data._id
 
-    handleClick = () => {
-
+        this.props.acceptChallenge({challengerId, challengerName, battleId})
     }
     componentWillUnmount = () => this.abortController.abort();
 
@@ -15,7 +17,7 @@ class MyBattle extends Component {
             challengers.push(
             <p key={key} style={{marginBottom: '10px'}}>
                 Name: {this.props.challengers[key]}
-                <button className='btn btn-sm btn-success' style={{marginLeft: '10px'}}>Accept Challenge</button>
+                <button onClick={this.handleClick.bind(this, key)} className='btn btn-sm btn-success' style={{marginLeft: '10px'}}>Accept Challenge</button>
             </p>
             )
         }

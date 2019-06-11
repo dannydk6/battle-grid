@@ -1,12 +1,21 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Route } from "react-router-dom";
+import socketIOClient from "socket.io-client";
 // components
 import Signup from "./components/sign-up";
 import LoginForm from "./components/login-form";
 import Navbar from "./components/navbar";
 import Home from "./components/home";
 import {withRouter} from 'react-router-dom'
+import Battle from "./components/battle"
+
+let socket = null
+
+let API_URL = process.env.REACT_APP_API_DEV
+if (process.env.REACT_APP_ENV === 'PRODUCTION'){
+  API_URL = process.env.REACT_APP_API_PROD
+}
 
 class App extends Component {
   constructor() {
@@ -23,9 +32,13 @@ class App extends Component {
     this.abortController = new window.AbortController();
   }
 
-  componentWillUnmount = () => {this.abortController.abort();}
+  componentWillUnmount = () => {
+    socket.disconnect()
+    this.abortController.abort();
+  }
 
   componentDidMount() {
+    socket = socketIOClient(API_URL)
     this.getUser();
   }
 
@@ -34,16 +47,19 @@ class App extends Component {
   }
 
   getUser() {
+    console.log('getting user')
     axios.get("/user/").then(response => {
       //console.log("Get user response: ");
-      //console.log(response.data);
+      console.log(response.data);
       if (response.data.user) {
         //console.log("Get User: There is a user saved in the server session: ");
         //console.log(response.data)
         this.setState({
           loggedIn: true,
           username: response.data.user.username,
-          _id: response.data.user._id
+          _id: response.data.user._id,
+          inBattle: response.data.user.inBattle,
+          attacks: response.data.user.attacks
         });
       } else {
         console.log("Get user: no user");
@@ -61,13 +77,28 @@ class App extends Component {
     return (
       <div className="App">
         <Navbar updateUser={this.updateUser} loggedIn={this.state.loggedIn} />{" "}
-        {/* greet user if logged in: */}{" "}
-        {this.state.loggedIn && <p style={{paddingTop:'10px'}}> Join the party, {this.state.username}! </p>}{" "}
         {/* Routes to different components */}
         {this.state.loggedIn && 
         <Route
           exact path="/"
-          render={() => <Home _id={this.state._id} username={this.state.username} />} />}
+          render={() => <Home _id={this.state._id} 
+          username={this.state.username} 
+          inBattle={this.state.inBattle}
+          attacks={this.state.attacks}
+          socket={socket}
+          />} />}
+        {this.state.loggedIn &&
+        <Route
+          path="/battle/:battleId"
+          render={({match}) => <Battle 
+          battleId={match.params.battleId}
+          _id={this.state._id} 
+          username={this.state.username} 
+          inBattle={this.state.inBattle}
+          attacks={this.state.attacks}
+          socket={socket}
+          loggedIn={this.state.loggedIn}
+        />} />}
         <Route
           path="/login"
           render={() => <LoginForm updateUser={this.updateUser} />}

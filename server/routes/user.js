@@ -40,7 +40,9 @@ router.post(
         console.log('logged in', req.user);
         var userInfo = {
             username: req.user.username,
-            _id: req.user._id
+            _id: req.user._id,
+            inBattle: req.user.inBattle,
+            attacks: req.user.attacks
         };
         res.send(userInfo);
     }

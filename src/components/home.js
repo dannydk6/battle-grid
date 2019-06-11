@@ -1,16 +1,12 @@
 import React, { Component } from "react";
-import socketIOClient from "socket.io-client";
+
 import axios from "axios";
 import BattleSlot from "./battleSlot"
 import MyBattle from "./myBattle"
-import groupBy from "../utils/helpers"
+import * as api from "../utils/api"
+import {deckStyle} from "../utils/helpers"
+import {withRouter} from 'react-router-dom'
 
-let socket = null
-
-let API_URL = process.env.REACT_APP_API_DEV
-if (process.env.REACT_APP_ENV === 'PRODUCTION'){
-  API_URL = process.env.REACT_APP_API_PROD
-}
 
 class Home extends Component {
   constructor(props) {
@@ -18,99 +14,107 @@ class Home extends Component {
     this.state = {
       createdBattle: false,
       handlingButton: false,
+      acceptedChallenge: false,
       battles: [],
-      challengers: {}
+      myBattle: {},
+      challengers: {},
+      currentBattle: false
     }
-    console.log(this.state)
-    this.handleClick = this.handleClick.bind(this);
+    this.handlePostBattleClick = this.handlePostBattleClick.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
-    this.getBattles = this.getBattles.bind(this);
     this.sendBattleRequest = this.sendBattleRequest.bind(this);
+    this.getBattles = api.getBattles.bind(this);
+    this.acceptChallenge = this.acceptChallenge.bind(this);
     console.log('hey')
   }
 
-  componentWillUnmount = () => this.abortController.abort();
-
-  abortController = new window.AbortController();
-
   componentDidMount(){
-    socket = socketIOClient(API_URL)
-    socket.emit('userIn', {userId: this.props._id})
+    console.log(this.props)
+    this._isMounted = true;
+    
+    this.props.socket.emit('userIn', {userId: this.props._id})
     this.getBattles()
 
-    socket.on('refresh', (data) =>{
+    this.props.socket.on('refresh', (data) =>{
       //console.log('yay!')
       this.getBattles()
     })
 
-    socket.on('challengeRequest', (data) =>{
+    this.props.socket.on('challengeRequest', (data) =>{
       console.log(data)
       console.log(`I was challenged by ${data.challengerName}`)
       const challengers = this.state.challengers
       challengers[data.challengerId] = data.challengerName
-      this.setState({challengers: challengers})
+      if (this._isMounted){
+        this.setState({challengers: challengers})
+      }
       console.log(this.state)
+    })
+
+    this.props.socket.on('redirectBattle', (data) =>{
+      this.props.history.push(`/battle/${data._id}`)
     })
   }
 
+  componentWillUnmount = () => {
+    this._isMounted = false
+    console.log(this.abortController)
+    this.abortController.abort()
+  };
+
+  abortController = new window.AbortController();
+
+  acceptChallenge(data) {
+    if (this._isMounted) {
+        this.setState({ acceptedChallenge: true })
+        data.initiatorId = this.props._id
+        data.initiatorName = this.props.username
+    }
+    console.log(data)
+    this.props.socket.emit('acceptChallenge', data)
+  }
   sendBattleRequest(data){
     data.challengerId = this.props._id
     data.challengerName = this.props.username
     console.log(data)
-    socket.emit('battleRequest', data)
+    this.props.socket.emit('battleRequest', data)
   }
 
-  handleClick(){
-    this.setState({handlingButton: true})
+  handlePostBattleClick(){
+    if(this._isMounted){
+      this.setState({handlingButton: true})
+    }
     this.postBattle();
   }
 
   handleRemove(){
-    this.setState({handlingButton: true})
-    const body = {username: this.props.username, _id: this.props._id}
-    axios.post("/battle/delete",body).then(response => {
-      //console.log(response.data);
-      this.getBattles()
-      this.setState({createdBattle: false, handlingButton: false, challengers: {}})
-      socket.emit('refreshBattles', 'refresh')
-    });
-  }
-
-  getBattles(){
-    axios.get('/battle/').then(response => {
-      const battles = response.data.data
-      let createdBattle = false
-      
-      const output = groupBy(battles, battle => (battle.initiatorId === this.props._id ? 'myBattle': 'battles'))
-      console.log(output)
-      console.log(this.props._id)
-      if (output.myBattle && output.myBattle.length > 0) {
-        createdBattle = true
-      }
-
-      if(output.myBattle){
-        output.myBattle = output.myBattle[0]
-      }else{
-        output.myBattle = null
-      }
-
-      if(!output.battles){
-        output.battles = []
-      }
-
-      this.setState({battles: output.battles, createdBattle: createdBattle, myBattle: output.myBattle})
-    })
+    if(this._isMounted){
+      this.setState({handlingButton: true})
+      const body = {username: this.props.username, _id: this.props._id}
+      axios.post("/battle/delete",body).then(response => {
+        //console.log(response.data);
+        this.getBattles()
+        if(this._isMounted){
+        this.setState({createdBattle: false, handlingButton: false, challengers: {}})
+        }
+        this.props.socket.emit('refreshBattles', 'refresh')
+      });
+    }
   }
 
   postBattle() {
-    console.log(this.props)
-    const body = {username: this.props.username, _id: this.props._id}
-    axios.post("/battle/",body).then(response => {
-      //console.log(response.data);
-      this.getBattles()
-      socket.emit('refreshBattles', 'refresh')
-      this.setState({handlingButton: false})
-    });
+    if (this._isMounted){
+      //console.log(this.props)
+      const body = {username: this.props.username, _id: this.props._id}
+      axios.post("/battle/",body).then(response => {
+        //console.log(response.data);
+        this.getBattles()
+        this.props.socket.emit('refreshBattles', 'refresh')
+        if(this._isMounted){
+          this.setState({handlingButton: false})
+        }
+      });
+    }
   }
 
   render() {
@@ -123,32 +127,29 @@ class Home extends Component {
     })
     return (
       <div>
-        <p> Welcome to da grid, mate </p>{" "}
-        { !this.state.handlingButton && !this.state.createdBattle &&
-        <button type="button" className='btn btn-secondary' onClick={this.handleClick}>
+        { <p style={{marginTop: '10px'}}> Welcome to da grid, {this.props.username} </p>}
+        { !this.props.inBattle && !this.state.acceptedChallenge && !this.state.handlingButton && !this.state.createdBattle &&
+        <button type="button" className='btn btn-secondary' onClick={this.handlePostBattleClick}>
           Create Battle
         </button>
         }
 
-        { !this.state.handlingButton && this.state.createdBattle && 
+        { !this.props.inBattle && !this.state.handlingButton && this.state.createdBattle && !this.state.acceptedChallenge && 
           <button type="button" className='btn btn-error' onClick={this.handleRemove}>
             Remove Battle
           </button>
         }
         <div style={deckStyle}>
+          {/*&& this.props.inBattle && this.state.acceptedChallenge */}
         { this.state.createdBattle &&
-          <MyBattle initiatorId ={this.props._id}
-                  initiatorName ={this.props.username}
-                  challengers={this.state.challengers}/>}
+          <MyBattle data={this.state.myBattle}
+                  challengers={this.state.challengers}
+                  acceptChallenge={this.acceptChallenge}/>}
         </div>
-        <div style={deckStyle}>{battles}</div>
+        <div style={deckStyle}>{!this.props.inBattle && battles}</div>
       </div>
     );
   }
 }
 
-const deckStyle = {width:'100%', display:'flex', marginTop: '10px',
-flexDirection:'row',alignItems: 'center',
-textAlign: 'center', justifyContent:'center'}
-
-export default Home;
+export default withRouter(Home);
